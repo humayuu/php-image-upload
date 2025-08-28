@@ -13,8 +13,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['isSubmitted'])) {
     exit;
   }
 
-
-
   $productName = filter_var($_POST['productName'], FILTER_SANITIZE_SPECIAL_CHARS);
   $image = null;
   $multipleImage = null;
@@ -25,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['isSubmitted'])) {
 
   if (empty($productName)) {
     header("Location: " . basename(__FILE__) . "?error=1");
+    exit;
   }
 
   if (!is_dir($uploadDir)) {
@@ -60,38 +59,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['isSubmitted'])) {
   }
 
   // Upload Multiple Image
-  if (isset($_FILES['multipleImages']) && is_array($_FILES['multipleImages']['error'] && $_FILES['multipleImages']['error'][0] === UPLOAD_ERR_OK)) {
-    foreach ($_FILES['multipleImages'] as $i => $originName) {
-      $ext = strtolower(pathinfo($_FILES['productImage']['name'], PATHINFO_EXTENSION))[$i];
-      $tmpName = $_FILES['productImage']['tmp_name'][$i];
-      $fileSize = $_FILES['productImage']['size'][$i];
+  if (isset($_FILES['multipleImages']) && is_array($_FILES['multipleImages']['error']) && $_FILES['multipleImages']['error'][0] === UPLOAD_ERR_OK) {
+    foreach ($_FILES['multipleImages']['name'] as $i => $originName) {
+      if ($_FILES['multipleImages']['error'][$i] !== UPLOAD_ERR_OK) continue;
+
+      $extension = strtolower(pathinfo($originName, PATHINFO_EXTENSION));
+      $tmpName = $_FILES['multipleImages']['tmp_name'][$i];
+      $fileSize = $_FILES['multipleImages']['size'][$i];
 
       if ($fileSize > $maxFileSize) {
         header("Location: " . basename(__FILE__) . "?sizeError=1");
         exit;
       }
 
-      if (!in_array($ext, $allowedExtension)) {
+      if (!in_array($extension, $allowedExtension)) {
         header("Location: " . basename(__FILE__) . "?extensionError=1");
         exit;
       }
 
 
-      $newMultiName = uniqid('pro_') . "_" . time() . "." . $ext;
+      $newMultiName = uniqid('pro_') . "_" . time() . "_$i" .  "." . $extension;
 
       if (!move_uploaded_file($tmpName, $uploadDir . $newMultiName)) {
         header("Location: " . basename(__FILE__) . "?uploadError=1");
         exit;
       }
 
-      $multipleName[] = $newMultiName;
-    }
-
-    if ($multipleName) {
-      $multipleImage = implode(', ', $multipleName);
+      $multipleName[] = "uploads/products/" . $newMultiName;
     }
   }
 
+  if (!empty($multipleName)) $multipleImage = implode(', ', $multipleName);
+
+  // Insert Record
   try {
     $conn->beginTransaction();
     $stmt = $conn->prepare("INSERT INTO product_tbl (product_name, product_image, product_multi_image) VALUES (:pname, :pimage, :pmimage)");
