@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['isSubmitted'])) {
       header("Location: " . basename(__FILE__)) . "?fileUploadError=1";
       exit;
     }
-    $image = $newName;
+    $image = 'upload/products/' . $newName;
   }
 
   try {
