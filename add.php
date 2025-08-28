@@ -35,27 +35,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['isSubmitted'])) {
 
   if (isset($_FILES['productImage']) && $_FILES['productImage']['error'] === UPLOAD_ERR_OK) {
 
-    $ext =
-      $tmpName = $_FILES['productImage']['tmp_name'];
+    $ext = strtolower(pathinfo($_FILES['productImage']['name'], PATHINFO_EXTENSION));
+    $tmpName = $_FILES['productImage']['tmp_name'];
     $size =    $_FILES['productImage']['size'];
-    $ext =     $_FILES['productImage']['type'];
 
-    if (!in_array($allowedType, $ext)) {
+    if (!in_array($ext, $allowedType)) {
       header("Location: " . basename(__FILE__)) . "?typeError=1";
       exit;
     }
 
-    if ($maxFileSize !== $size) {
+    if ($size > $maxFileSize) {
       header("Location: " . basename(__FILE__)) . "?szeError=1";
       exit;
     }
 
-    $newName = uniqid() . time() . "pro_" . "." . $ext;
+    $newName = uniqid('pro_') . time() . "." . $ext;
 
     if (!move_uploaded_file($tmpName, $newName . $uploadDir)) {
       header("Location: " . basename(__FILE__)) . "?fileUploadError=1";
       exit;
     }
+    $image = $newName;
   }
 
   try {
