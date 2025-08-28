@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['isSubmitted'])) {
     }
   }
 
-  if (!empty($multipleName)) $multipleImage = implode(', ', $multipleName);
+  if (!empty($multipleName)) $multipleImage = implode(',', $multipleName);
 
   // Insert Record
   try {

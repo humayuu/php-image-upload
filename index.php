@@ -43,7 +43,7 @@ $products = $stmt->fetchAll();
                                 <td>
                                     <div class="multiple-images">
                                         <?php
-                                        $multiImg = explode(', ', $product['product_multi_image']);
+                                        $multiImg = explode(',', $product['product_multi_image']);
                                         foreach ($multiImg as $img):
                                         ?>
                                             <img src="<?= $img ?>" alt="Image 1" class="thumbnail">

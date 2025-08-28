@@ -23,7 +23,7 @@ try {
             unlink($thumbnail);
         }
         if (!empty($multipleImage)) {
-            $image = explode(', ', $multipleImage);
+            $image = explode(',', $multipleImage);
             foreach ($image as $img) {
                 if (!empty($img) && file_exists($img)) {
                     trim($img);
