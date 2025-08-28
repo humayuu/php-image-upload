@@ -1,4 +1,8 @@
+<?php
+require 'config.php';
 
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -24,22 +28,39 @@
 <body>
   <div class="form-container">
     <h2 class="form-title">Edit Product</h2>
+    <?php
+    $id = htmlspecialchars($_GET['id']);
+    $sql = $conn->prepare("SELECT * FROM product_tbl WHERE id = :id");
+    $sql->bindParam(":id", $id);
+    $sql->execute();
+    $product = $sql->fetch();
+    ?>
 
-
-    <form  id="productForm" >
+    <form id="productForm">
       <div class="form-group">
         <label for="productName">Product Name</label>
-        <input type="text" id="productName" name="productName">
+        <input type="text" id="productName" name="productName"
+          value="<?= htmlspecialchars($product['product_name']) ?>">
       </div>
 
       <div class="form-group">
         <label for="productImage">Product Image</label>
         <input type="file" id="productImage" name="productImage" accept="image/*" class="file-input">
+        <img width="100" src="<?= htmlspecialchars($product['product_image']) ?>" alt="">
       </div>
 
       <div class="form-group">
         <label for="multipleImages">Multiple Images</label>
-        <input type="file" id="multipleImages" name="multipleImages[]" accept="image/*" multiple class="file-input">
+        <input type="file" id="multipleImages" name="multipleImages[]" accept="image/*" multiple
+          class="file-input">
+        <?php
+        $image = explode(', ', $product['product_multi_image']);
+        foreach ($image as $img):
+
+        ?>
+          <img width="100" src="<?= htmlspecialchars($img['product_multi_image']) ?>s" alt="">
+        <?php endforeach; ?>
+
       </div>
 
       <button type="submit" name="isSubmitted" class="submit-btn">Add Product</button>
@@ -48,4 +69,4 @@
 </body>
 
 </html>
-
+<?php $conn = null; ?>

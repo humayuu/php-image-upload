@@ -22,7 +22,7 @@ try {
         if (!empty($thumbnail) && file_exists($thumbnail)) {
             unlink($thumbnail);
         }
-        if (!empty($multipleImage) && file_exists($thumbnail)) {
+        if (!empty($multipleImage)) {
             $image = explode(', ', $multipleImage);
             foreach ($image as $img) {
                 if (!empty($img) && file_exists($img)) {
@@ -31,6 +31,12 @@ try {
                 }
             }
         }
+
+        $conn->commit();
+
+        // Redirect to Home Page
+        header("Location: index.php?success=1");
+        exit;
     }
 } catch (PDOException $e) {
     if ($conn->inTransaction()) {
@@ -38,27 +44,6 @@ try {
     }
     error_log("Error in Product Delete " .  __FILE__ . "on" . __LINE__ . $e->getMessage());
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 $conn = null;
