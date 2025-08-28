@@ -16,27 +16,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['isSubmitted'])) {
 
 
   $productName = filter_var(trim($_POST['productName']), FILTER_SANITIZE_SPECIAL_CHARS);
-  $productImage = filter_var(trim($_POST['productImage']), FILTER_SANITIZE_SPECIAL_CHARS);
-  $productMultiImage = "Multiple Image";
+  $image = null;
+  $multiImage = null;
   $allowedType = ['jpeg', 'jpg', 'png', 'gif', 'pdf'];
-  $maxFileSize = 1024 * 1024 * 2; // 5 MB
+  $maxFileSize = 2 * 1024 * 1024; // 2 MB
   $uploadDir =  __DIR__ .  '/uploads/products/';
 
-  if (!$uploadDir) {
+  if (!is_dir($uploadDir)) {
     mkdir($uploadDir,  0755, true);
   }
 
 
 
-  if (empty($productName) || empty($productImage)) {
+  if (empty($productName)) {
     header("Location: " . basename(__FILE__)) . "?FiledError=1";
     exit;
   }
 
   if (isset($_FILES['productImage']) && $_FILES['productImage']['error'] === UPLOAD_ERR_OK) {
 
-    $name =    $_FILES['productImage']['name'];
-    $tmpName = $_FILES['productImage']['tmp_name'];
+    $ext =
+      $tmpName = $_FILES['productImage']['tmp_name'];
     $size =    $_FILES['productImage']['size'];
     $ext =     $_FILES['productImage']['type'];
 
@@ -123,6 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['isSubmitted'])) {
         <label for="multipleImages">Multiple Images</label>
         <input type="file" id="multipleImages" name="multipleImages[]" accept="image/*" multiple
           class="file-input">
+        3
       </div>
 
       <button type="submit" name="isSubmitted" class="submit-btn">Add Product</button>
