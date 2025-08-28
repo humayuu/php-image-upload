@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['isSubmitted'])) {
       exit;
     }
 
-    $newName = uniqid('pro_') . time() . "." . $ext;
+    $newName = uniqid('pro_') . "_" . time() . "." . $ext;
 
     if (!move_uploaded_file($tmpName, $newName . $uploadDir)) {
       header("Location: " . basename(__FILE__)) . "?fileUploadError=1";
@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['isSubmitted'])) {
     $conn->beginTransaction();
     $stmt = $conn->prepare("INSERT INTO product_tbl (product_name, product_image, product_multi_image) VALUES (:pname, :pimage, :pmimage)");
     $stmt->bindParam(":pname", $productName);
-    $stmt->bindParam(":pimage", $newName);
+    $stmt->bindParam(":pimage", $image);
     $stmt->bindParam(":pmimage", $productMultiImage);
     $result = $stmt->execute();
 
