@@ -15,47 +15,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['isSubmitted'])) {
 
 
 
-  $productName = filter_var(trim($_POST['productName']), FILTER_SANITIZE_SPECIAL_CHARS);
+  $productName = filter_var($_POST['productName'], FILTER_SANITIZE_SPECIAL_CHARS);
   $image = null;
-  $multiImage = null;
-  $allowedType = ['jpeg', 'jpg', 'png', 'gif', 'pdf'];
+  $multipleImage = null;
+  $multipleName = [];
+  $allowedExtension = ['jpeg', 'jpg', 'png', 'gif'];
   $maxFileSize = 2 * 1024 * 1024; // 2 MB
-  $uploadDir =  __DIR__ .  '/uploads/products/';
-
-  if (!is_dir($uploadDir)) {
-    mkdir($uploadDir,  0755, true);
-  }
-
-
+  $uploadDir = __DIR__ . "/uploads/products/";
 
   if (empty($productName)) {
-    header("Location: " . basename(__FILE__)) . "?FiledError=1";
-    exit;
+    header("Location: " . basename(__FILE__) . "?error=1");
   }
 
+  if (!is_dir($uploadDir)) {
+    mkdir($uploadDir, 0755, true);
+  }
+
+  // Upload Single Image
   if (isset($_FILES['productImage']) && $_FILES['productImage']['error'] === UPLOAD_ERR_OK) {
 
     $ext = strtolower(pathinfo($_FILES['productImage']['name'], PATHINFO_EXTENSION));
     $tmpName = $_FILES['productImage']['tmp_name'];
-    $size =    $_FILES['productImage']['size'];
+    $fileSize = $_FILES['productImage']['size'];
 
-    if (!in_array($ext, $allowedType)) {
-      header("Location: " . basename(__FILE__)) . "?typeError=1";
+    if ($fileSize > $maxFileSize) {
+      header("Location: " . basename(__FILE__) . "?sizeError=1");
       exit;
     }
 
-    if ($size > $maxFileSize) {
-      header("Location: " . basename(__FILE__)) . "?szeError=1";
+    if (!in_array($ext, $allowedExtension)) {
+      header("Location: " . basename(__FILE__) . "?extensionError=1");
       exit;
     }
+
 
     $newName = uniqid('pro_') . "_" . time() . "." . $ext;
 
-    if (!move_uploaded_file($tmpName, $newName . $uploadDir)) {
-      header("Location: " . basename(__FILE__)) . "?fileUploadError=1";
+    if (!move_uploaded_file($tmpName, $uploadDir . $newName)) {
+      header("Location: " . basename(__FILE__) . "?uploadError=1");
       exit;
     }
-    $image = 'upload/products/' . $newName;
+
+    $image = "uploads/products/" . $newName;
+  }
+
+  // Upload Multiple Image
+  if (isset($_FILES['multipleImages']) && $_FILES['multipleImages']['error'][0] === UPLOAD_ERR_OK) {
+    foreach(){
+       $ext = strtolower(pathinfo($_FILES['productImage']['name'], PATHINFO_EXTENSION));
+    $tmpName = $_FILES['productImage']['tmp_name'];
+    $fileSize = $_FILES['productImage']['size'];
+
+    if ($fileSize > $maxFileSize) {
+      header("Location: " . basename(__FILE__) . "?sizeError=1");
+      exit;
+    }
+
+    if (!in_array($ext, $allowedExtension)) {
+      header("Location: " . basename(__FILE__) . "?extensionError=1");
+      exit;
+    }
+
+
+    $newName = uniqid('pro_') . "_" . time() . "." . $ext;
+
+    if (!move_uploaded_file($tmpName, $uploadDir . $newName)) {
+      header("Location: " . basename(__FILE__) . "?uploadError=1");
+      exit;
+    }
+
+    $image = "uploads/products/" . $newName;
+    }
   }
 
   try {
@@ -84,13 +114,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['isSubmitted'])) {
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Product Form</title>
-  <link rel="stylesheet" href="assets/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Form</title>
+    <link rel="stylesheet" href="assets/styles.css">
 </head>
 <style>
-  .error {
+.error {
     color: #842029;
     background-color: #f8d7da;
     border: 1px solid #f5c2c7;
@@ -99,36 +129,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['isSubmitted'])) {
     border-radius: 0.25rem;
     font-size: 0.9rem;
     line-height: 1.4;
-  }
+}
 </style>
 
 <body>
-  <div class="form-container">
-    <h2 class="form-title">Add Product</h2>
+    <div class="form-container">
+        <h2 class="form-title">Add Product</h2>
 
 
-    <form method="POST" action="<?= htmlspecialchars(basename(__FILE__)) ?>" id="productForm">
-      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
-      <div class="form-group">
-        <label for="productName">Product Name</label>
-        <input type="text" id="productName" name="productName">
-      </div>
+        <form method="POST" action="<?= htmlspecialchars(basename(__FILE__)) ?>" enctype="multipart/form-data"
+            id="productForm">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+            <div class="form-group">
+                <label for="productName">Product Name</label>
+                <input type="text" id="productName" name="productName">
+            </div>
 
-      <div class="form-group">
-        <label for="productImage">Product Image</label>
-        <input type="file" id="productImage" name="productImage" accept="image/*" class="file-input">
-      </div>
+            <div class="form-group">
+                <label for="productImage">Product Image</label>
+                <input type="file" id="productImage" name="productImage" accept="image/*" class="file-input">
+            </div>
 
-      <div class="form-group">
-        <label for="multipleImages">Multiple Images</label>
-        <input type="file" id="multipleImages" name="multipleImages[]" accept="image/*" multiple
-          class="file-input">
-        3
-      </div>
+            <div class="form-group">
+                <label for="multipleImages">Multiple Images</label>
+                <input type="file" id="multipleImages" name="multipleImages[]" accept="image/*" multiple
+                    class="file-input">
+            </div>
 
-      <button type="submit" name="isSubmitted" class="submit-btn">Add Product</button>
-    </form>
-  </div>
+            <button type="submit" name="isSubmitted" class="submit-btn">Add Product</button>
+        </form>
+    </div>
 </body>
 
 </html>
