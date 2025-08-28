@@ -1,29 +1,35 @@
 <?php
 require 'config.php';
-$id = htmlspecialchars($_GET['id']);
 
+// First We Fetch images
+$id = htmlspecialchars($_GET['id']);
 $sql = $conn->prepare("SELECT * FROM product_tbl WHERE id = :id");
 $sql->bindParam(":id", $id);
 $sql->execute();
 $product = $sql->fetch();
-$singleImage = $product['product_image'];
+$thumbnail = $product['product_image'];
 $multipleImage = $product['product_multi_image'];
 
-// Delete Product 
-
 try {
-
+    $conn->beginTransaction();
+    // Start Delete Products 
     $stmt = $conn->prepare("DELETE FROM product_tbl WHERE id = :id");
     $stmt->bindParam(":id", $id);
     $result = $stmt->execute();
 
     if ($result) {
 
-        if (file_exists($singleImage)) {
-            unlink($singleImage);
+        if (!empty($thumbnail) && file_exists($thumbnail)) {
+            unlink($thumbnail);
         }
-        if (file_exists($multipleImage)) {
-            unlink($multipleImage);
+        if (!empty($multipleImage) && file_exists($thumbnail)) {
+            $image = explode(', ', $multipleImage);
+            foreach ($image as $img) {
+                if (!empty($img) && file_exists($img)) {
+                    trim($img);
+                    unlink($img);
+                }
+            }
         }
     }
 } catch (PDOException $e) {
