@@ -191,7 +191,40 @@ class File
     }
 
     // Function for Delete Image from Folder
-    public function DeleteImage($table, $column, $where = null)
+    public function DeleteSingleImage($table, $column, $where = null)
+    {
+        if (!$this->tableExists($table)) {
+            return false;
+        }
+
+        try {
+            // Build query
+            $query = "SELECT `$column` FROM `$table`";
+            if ($where !== null) {
+                $query .= " WHERE $where";
+            }
+
+            $stmt = $this->pdo->prepare($query);
+            $stmt->execute();
+            $result = $stmt->fetch();
+
+            if ($result && isset($result[$column])) {
+                $imagePath = $result[$column];
+
+                if (!empty($imagePath) && file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+                return true;
+            }
+
+            return false;
+        } catch (PDOException $e) {
+            $this->error[] = "Error in Delete image: " . $e->getMessage();
+            return false;
+        }
+    }
+    // Function for Delete Image from Folder
+    public function DeleteMultipleImage($table, $column, $where = null)
     {
         if (!$this->tableExists($table)) {
             return false;
@@ -220,12 +253,6 @@ class File
                         if (file_exists($fullPath)) {
                             unlink($fullPath);
                         }
-                    }
-                } else {
-                    // Single image
-                    $fullPath = __DIR__ . '/' . $imagePath;
-                    if (file_exists($fullPath)) {
-                        unlink($fullPath);
                     }
                 }
                 return true;
